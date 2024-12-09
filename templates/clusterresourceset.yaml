@@ -1,0 +1,27 @@
+apiVersion: addons.cluster.x-k8s.io/v1beta1
+kind: ClusterResourceSet
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    cluster.x-k8s.io/cluster-name: {{ .Release.Name }}
+spec:
+  clusterSelector:
+    matchLabels:
+      cluster.x-k8s.io/cluster-name: {{ .Release.Name }}
+  resources:
+  - kind: ConfigMap
+    name: {{ .Release.Name }}-csi-manifests
+  - kind: Secret
+    name: {{ .Release.Name }}-vsphere-config-secret
+
+  - kind: Secret
+    name: {{ .Release.Name }}-vsphere-cloud-secret
+
+  - kind: Secret
+    name: {{ .Release.Name }}-argocd-repo
+  - kind: ConfigMap
+    name: {{ .Release.Name }}-argocd
+
+  - kind: ConfigMap
+    name: {{ .Release.Name }}-cilium

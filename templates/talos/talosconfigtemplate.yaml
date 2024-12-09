@@ -1,0 +1,46 @@
+{{ range .Values.worker.templates }}
+---
+apiVersion: bootstrap.cluster.x-k8s.io/v1alpha3
+kind: TalosConfigTemplate
+metadata:
+  annotations:
+    helm.sh/resource-policy: keep
+  name: {{ $.Release.Name }}-{{ .name }}
+  namespace: {{ $.Release.Namespace }}
+spec:
+  template:
+    spec:
+      generateType: join
+      talosVersion: {{ $.Values.talos.version }}
+      configPatches:
+{{ toYaml .configPatches | indent 6 }}
+      strategicPatches:
+        - |
+          machine:
+            registries:
+              config:
+                zot.onprem-***.example.com:
+                  tls:
+                    insecureSkipVerify: true
+              mirrors:
+                docker.io:
+                  endpoints:
+                    - https://zot.onprem-***.example.com/v2/proxy-docker.io
+                    - https://registry-1.docker.io/v2/
+                  overridePath: true
+                ghcr.io:
+                  endpoints:
+                    - https://zot.onprem-***.example.com/v2/proxy-ghcr.io
+                    - https://ghcr.io/v2/
+                  overridePath: true
+                gcr.io:
+                  endpoints:
+                    - https://zot.onprem-***.example.com/v2/proxy-gcr.io
+                    - https://gcr.io/v2/
+                  overridePath: true
+                registry.k8s.io:
+                  endpoints:
+                    - https://zot.onprem-***.example.com/v2/proxy-registry.k8s.io
+                    - https://registry.k8s.io/v2/
+                  overridePath: true
+{{- end }}

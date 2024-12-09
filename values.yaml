@@ -1,0 +1,119 @@
+credentials:
+  vsphere:
+    server: x0430se.example.com
+    # Username needs the full domain name, ie. "user@vpshere.local"
+    username: ""
+    password: ""
+
+cluster:
+  version: 1.30.0
+  network:
+    podCidr: 192.168.0.0/16
+
+talos:
+  # Major.Minor version
+  version: v1.7
+
+#
+# These are immutable, create new ones!
+#
+machineTemplates:
+- name: &currentControlPlaneMachineTemplate controlplane
+  template: talos-1.7.4-vmware
+  datacenter: DC1
+  datastore: DATASTOREXXXX
+  networkName: dVLAN_630
+  folder: zzz
+  diskGiB: 50
+  memoryMiB: 8192
+  numCPUs: 4
+
+- name: &currentWorkerMachineTemplate worker
+  template: talos-1.7.4-vmware
+  datacenter: DC1
+  datastore: DATASTOREXXXX
+  networkName: dVLAN_630
+  folder: zzz
+  diskGiB: 100
+  memoryMiB: 32000
+  numCPUs: 8
+
+
+controlPlane:
+  endpoint: 10.6.70.7 # TODO: eaip-onprem-vip.example.com works or not?
+  port: 6443
+  replicas: 3
+  machineTemplate: *currentControlPlaneMachineTemplate
+  configPatches:
+      # We install cilium seperate
+      - op: add
+        path: /cluster/network/cni
+        value:
+          name: none
+
+      # Cilium replaces the proxy
+      - op: add
+        path: /cluster/proxy
+        value:
+          disabled: true
+
+      # vSphere CPI
+      - op: add
+        path: /cluster/externalCloudProvider
+        value:
+          enabled: true
+
+      # Disable talos cluster discovery feature
+      - op: add
+        path: /cluster/discovery
+        value:
+          enabled: false
+
+      # For metrics
+      - op: add
+        path: /cluster/controllerManager/extraArgs
+        value:
+          bind-address: 0.0.0.0
+
+      # For metrics
+      - op: add
+        path: /cluster/scheduler/extraArgs
+        value:
+          bind-address: 0.0.0.0
+
+      # For metrics
+      - op: add
+        path: /cluster/etcd/extraArgs
+        value:
+          listen-metrics-urls: http://0.0.0.0:2381
+
+      #
+      - op: add
+        path: /machine/network
+        value:
+          interfaces:
+          - interface: eth0
+            dhcp: true
+            vip:
+              ip: 10.6.70.7
+
+
+worker:
+  replicas: 3
+  templates:
+  - name: &currentTalosTemplate worker
+    configPatches:
+      - op: add
+        path: /cluster/externalCloudProvider
+        value:
+          enabled: true
+      - op: add
+        path: /cluster/network/cni
+        value:
+          name: none
+      - op: add
+        path: /cluster/proxy
+        value:
+          disabled: true
+  machineTemplate: *currentWorkerMachineTemplate
+  talosTemplate: *currentTalosTemplate

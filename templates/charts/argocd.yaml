@@ -1,0 +1,12 @@
+apiVersion: addons.cluster.x-k8s.io/v1alpha1
+kind: HelmChartProxy
+metadata:
+  name: {{ .Release.Name }}-argocd
+spec:
+  clusterSelector:
+    matchLabels:
+      {{ .Release.Name }}-argocdChart: enabled
+  repoURL: https://argoproj.github.io/argo-helm
+  chartName: argo-cd
+  releaseName: argocd
+  namespace: argocd

@@ -1,0 +1,29 @@
+{{ range .Values.machineTemplates }}
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: VSphereMachineTemplate
+metadata:
+  annotations:
+    helm.sh/resource-policy: keep
+  name: {{ $.Release.Name }}-{{ .name }}
+  namespace: {{ $.Release.Namespace }}
+spec:
+  template:
+    spec:
+      cloneMode: linkedClone
+      datacenter: {{ .datacenter }}
+      datastore: {{ .datastore }}
+      diskGiB: {{ .diskGiB }}
+      folder: {{ .folder }}
+      memoryMiB: {{ .memoryMiB }}
+      network:
+        devices:
+        - dhcp4: true
+          networkName: {{ .networkName }}
+      numCPUs: {{ .numCPUs }}
+      os: Linux
+      powerOffMode: trySoft
+      server: {{ $.Values.credentials.vsphere.server }}
+      template: {{ .template }}
+
+{{- end }}

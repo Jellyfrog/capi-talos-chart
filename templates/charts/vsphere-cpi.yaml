@@ -1,0 +1,20 @@
+apiVersion: addons.cluster.x-k8s.io/v1alpha1
+kind: HelmChartProxy
+metadata:
+  name: {{ .Release.Name }}-vsphere-cpi
+spec:
+  clusterSelector:
+    matchLabels:
+      {{ .Release.Name }}-vsphereCpiChart: enabled
+  repoURL: https://kubernetes.github.io/cloud-provider-vsphere
+  chartName: vsphere-cpi
+  releaseName: vsphere-cpi
+  namespace: kube-system
+  valuesTemplate: |
+    config:
+      enabled: true
+      vcenter: {{ $.Values.credentials.vsphere.server | quote }}
+      datacenter: "DC1"
+
+      secret:
+        create: false

@@ -1,0 +1,26 @@
+
+
+      ██████╗ ███╗   ██╗██████╗ ██████╗ ███████╗███╗   ███╗
+     ██╔═══██╗████╗  ██║██╔══██╗██╔══██╗██╔════╝████╗ ████║
+     ██║   ██║██╔██╗ ██║██████╔╝██████╔╝█████╗  ██╔████╔██║
+     ██║   ██║██║╚██╗██║██╔═══╝ ██╔══██╗██╔══╝  ██║╚██╔╝██║
+     ╚██████╔╝██║ ╚████║██║     ██║  ██║███████╗██║ ╚═╝ ██║
+      ╚═════╝ ╚═╝  ╚═══╝╚═╝     ╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝
+
+------------------------------------------------------------
+Check the status with:
+watch clusterctl describe cluster -n {{ .Release.Namespace }} {{ .Release.Name }} --grouping=false --color
+
+------------------------------------------------------------
+Get the KUBECONFIG with:
+
+clusterctl get kubeconfig -n {{ .Release.Namespace }} {{ .Release.Name }} > /tmp/kubeconfig.yaml
+KUBECONFIG=/tmp/kubeconfig.yaml kubectl get nodes
+
+------------------------------------------------------------
+Get TALOSCONFIG with:
+
+kubectl get secret -n {{ .Release.Namespace }} {{ .Release.Name }}-talosconfig -o jsonpath='{.data.talosconfig}' | base64 -d > /tmp/talosconfig.yaml
+TALOSCONFIG=/tmp/talosconfig.yaml talosctl -n {{ .Values.controlPlane.endpoint }} etcd members
+
+------------------------------------------------------------

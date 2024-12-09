@@ -1,0 +1,15 @@
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: VSphereCluster
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/resource-policy: keep
+spec:
+  controlPlaneEndpoint:
+    host: {{ .Values.controlPlane.endpoint }}
+    port: {{ .Values.controlPlane.port }}
+  identityRef:
+    kind: Secret
+    name: {{ .Release.Name }}
+  server: {{ .Values.credentials.vsphere.server }}

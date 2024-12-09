@@ -1,0 +1,45 @@
+apiVersion: addons.cluster.x-k8s.io/v1alpha1
+kind: HelmChartProxy
+metadata:
+  name: {{ .Release.Name }}-cilium
+spec:
+  clusterSelector:
+    matchLabels:
+      {{ .Release.Name }}-ciliumChart: enabled
+  repoURL: https://helm.cilium.io/
+  chartName: cilium
+  releaseName: cilium
+  namespace: kube-system
+  valuesTemplate: |
+    ipam:
+      mode: kubernetes
+    kubeProxyReplacement: true
+    k8sServiceHost: localhost
+    k8sServicePort: 7445
+
+    l2announcements:
+      enabled: true
+    devices: eth0
+
+    securityContext:
+      capabilities:
+        ciliumAgent:
+          - CHOWN
+          - KILL
+          - NET_ADMIN
+          - NET_RAW
+          - IPC_LOCK
+          - SYS_ADMIN
+          - SYS_RESOURCE
+          - DAC_OVERRIDE
+          - FOWNER
+          - SETGID
+          - SETUID
+        cleanCiliumState:
+          - NET_ADMIN
+          - SYS_ADMIN
+          - SYS_RESOURCE
+    cgroup:
+      autoMount:
+        enabled: false
+      hostRoot: /sys/fs/cgroup

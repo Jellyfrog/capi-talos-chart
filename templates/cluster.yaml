@@ -1,0 +1,23 @@
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: Cluster
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    cluster.x-k8s.io/cluster-name: {{ .Release.Name }}
+    {{ .Release.Name }}-vsphereCpiChart: enabled
+    {{ .Release.Name }}-ciliumChart: enabled
+    {{ .Release.Name }}-argocdChart: enabled
+spec:
+  clusterNetwork:
+    pods:
+      cidrBlocks:
+      - {{ .Values.cluster.network.podCidr }}
+  controlPlaneRef:
+    apiVersion: controlplane.cluster.x-k8s.io/v1alpha3
+    kind: TalosControlPlane
+    name: {{ .Release.Name }}
+  infrastructureRef:
+    apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+    kind: VSphereCluster
+    name: {{ .Release.Name }}

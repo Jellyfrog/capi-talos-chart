@@ -1,0 +1,31 @@
+apiVersion: v1
+data:
+  data: |
+    ---
+    apiVersion: "cilium.io/v2alpha1"
+    kind: CiliumLoadBalancerIPPool
+    metadata:
+      name: "pool"
+    spec:
+      blocks:
+      - cidr: "10.6.70.9/32"
+
+    ---
+    apiVersion: "cilium.io/v2alpha1"
+    kind: CiliumL2AnnouncementPolicy
+    metadata:
+      name: policy
+    spec:
+      nodeSelector:
+        matchExpressions:
+          - key: node-role.kubernetes.io/control-plane
+            operator: DoesNotExist
+      loadBalancerIPs: true
+
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-cilium
+  namespace: {{ .Release.Namespace }}
+
+
+

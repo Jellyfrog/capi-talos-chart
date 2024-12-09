@@ -1,0 +1,49 @@
+apiVersion: controlplane.cluster.x-k8s.io/v1alpha3
+kind: TalosControlPlane
+metadata:
+  annotations:
+    helm.sh/resource-policy: keep
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  controlPlaneConfig:
+    controlplane:
+      generateType: controlplane
+      talosVersion: {{ .Values.talos.version }}
+      configPatches:
+{{ toYaml .Values.controlPlane.configPatches | indent 6 }}
+      strategicPatches:
+        - |
+          machine:
+            registries:
+              config:
+                zot.onprem-***.example.com:
+                  tls:
+                    insecureSkipVerify: true
+              mirrors:
+                docker.io:
+                  endpoints:
+                    - https://zot.onprem-***.example.com/v2/proxy-docker.io
+                    - https://registry-1.docker.io/v2/
+                  overridePath: true
+                ghcr.io:
+                  endpoints:
+                    - https://zot.onprem-***.example.com/v2/proxy-ghcr.io
+                    - https://ghcr.io/v2/
+                  overridePath: true
+                gcr.io:
+                  endpoints:
+                    - https://zot.onprem-***.example.com/v2/proxy-gcr.io
+                    - https://gcr.io/v2/
+                  overridePath: true
+                registry.k8s.io:
+                  endpoints:
+                    - https://zot.onprem-***.example.com/v2/proxy-registry.k8s.io
+                    - https://registry.k8s.io/v2/
+                  overridePath: true
+  infrastructureTemplate:
+    apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+    kind: VSphereMachineTemplate
+    name: {{ .Release.Name }}-{{ .Values.controlPlane.machineTemplate }}
+  replicas: {{ .Values.controlPlane.replicas }}
+  version: {{ .Values.cluster.version }}

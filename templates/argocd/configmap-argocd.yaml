@@ -1,0 +1,27 @@
+apiVersion: v1
+data:
+  data: |
+    ---
+    apiVersion: argoproj.io/v1alpha1
+    kind: Application
+    metadata:
+      name: bootstrap
+      namespace: argocd
+    spec:
+      destination:
+        namespace: argocd
+        server: https://kubernetes.default.svc
+      project: default
+      source:
+        path: cluster-apps/bootstrap
+        repoURL: https://gitlab.example.com/***/project-group/***/***/onprem-poc/onprem-vsphere.git
+        targetRevision: HEAD
+      syncPolicy:
+        automated: {}
+        syncOptions:
+        - CreateNamespace=true
+
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-argocd
+  namespace: {{ .Release.Namespace }}
